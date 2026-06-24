@@ -44,7 +44,7 @@ function loadScores() {
 }
 function saveScore(name, sc, lv) {
   const scores = loadScores();
-  const entry = {name: name || 'ANON', score: sc, level: lv, _new: true};
+  const entry = {name: name || 'Pug', score: sc, level: lv, _new: true};
   scores.push(entry);
   scores.sort((a,b) => b.score - a.score);
   newScoreRank = scores.findIndex(s => s._new);
@@ -55,7 +55,7 @@ function saveScore(name, sc, lv) {
 function showStartScreen() {
   document.getElementById('name-entry-title').textContent = "PUG'S BIG ADVENTURE";
   document.getElementById('name-entry-title').style.color = '#ffcc00';
-  document.getElementById('name-entry-subtitle').textContent = 'Enter your name (max 20 characters)';
+  document.getElementById('name-entry-subtitle').textContent = 'What is your pug\'s name? (max 20 characters)';
   const div = document.getElementById('name-entry');
   const input = document.getElementById('initials-input');
   div.style.display = 'flex';
@@ -63,7 +63,7 @@ function showStartScreen() {
   input.select();
   setTimeout(() => input.focus(), 50);
   function submit() {
-    playerName = input.value.trim() || 'ANON';
+    playerName = input.value.trim() || 'Pug';
     localStorage.setItem('pugPlayerName', playerName);
     div.style.display = 'none';
     for (const k in pressed) delete pressed[k];
@@ -716,6 +716,8 @@ function drawHeart(x, y, size, filled) {
 
 function drawHUD() {
   for (let i = 0; i < player.maxHealth; i++) drawHeart(10+i*28, 10, 24, i < player.health);
+  ctx.fillStyle = '#ffcc00'; ctx.font = 'bold 12px monospace';
+  ctx.textAlign = 'left'; ctx.fillText(playerName, 12, 46);
   ctx.fillStyle = '#fff8e7'; ctx.font = 'bold 15px monospace';
   ctx.textAlign = 'center'; ctx.fillText('LVL ' + currentLevel, W/2, 26);
   ctx.textAlign = 'right';  ctx.fillText('Score: ' + score, W-10, 26);
