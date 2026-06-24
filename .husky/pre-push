@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+echo -e "${BOLD}[PipelineScanner] Pre-push checks${NC}"
+FAILED=0
+
+# --- 1. Semgrep: full SAST scan ---
+if command -v semgrep &>/dev/null; then
+  echo "  Semgrep SAST scan..."
+  SEMGREP_ARGS="--error"
+  if [ -f ".semgrep/config.yaml" ]; then
+    SEMGREP_ARGS="$SEMGREP_ARGS --config .semgrep/config.yaml"
+  fi
+  # Always include the JS and secrets registry rulesets
+  SEMGREP_ARGS="$SEMGREP_ARGS --config p/javascript --config p/secrets"
+
+  if semgrep scan $SEMGREP_ARGS 2>&1; then
+    echo -e "  ${GREEN}Semgrep: PASS${NC}"
+  else
+    echo -e "  ${RED}Semgrep: FAIL${NC}"
+    FAILED=1
+  fi
+else
+  echo -e "  Semgrep SAST scan...      ${YELLOW}SKIP${NC} (semgrep not installed)"
+fi
+
+# --- 2. npm audit: dependency vulnerability check ---
+if [ -f "package.json" ]; then
+  printf "  npm audit (high+)...      "
+  if npm audit --audit-level=high 2>/tmp/npm-audit-output; then
+    echo -e "${GREEN}PASS${NC}"
+  else
+    echo -e "${RED}FAIL${NC}"
+    echo ""
+    npm audit --audit-level=high 2>&1 | grep -E "(high|critical|moderate|Severity|npm audit fix)" | head -20 || true
+    echo "  Run 'npm audit' for full details or 'npm audit fix' to auto-remediate."
+    FAILED=1
+  fi
+fi
+
+echo ""
+if [ $FAILED -ne 0 ]; then
+  echo -e "${RED}Pre-push checks failed. Resolve the issues above before pushing.${NC}"
+  echo -e "  Emergency bypass (use sparingly): ${YELLOW}git push --no-verify${NC}"
+  exit 1
+fi
+echo -e "${GREEN}All pre-push checks passed.${NC}"

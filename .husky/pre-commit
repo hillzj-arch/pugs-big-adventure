@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+echo -e "${BOLD}[PipelineScanner] Pre-commit checks${NC}"
+FAILED=0
+
+# --- 1. Gitleaks: scan staged files for secrets ---
+if command -v gitleaks &>/dev/null; then
+  printf "  Secrets (gitleaks)...     "
+  if gitleaks protect --staged --redact 2>/tmp/gitleaks-output; then
+    echo -e "${GREEN}PASS${NC}"
+  else
+    echo -e "${RED}FAIL${NC}"
+    cat /tmp/gitleaks-output
+    FAILED=1
+  fi
+else
+  echo -e "  Secrets (gitleaks)...     ${YELLOW}SKIP${NC} (gitleaks not installed)"
+fi
+
+# --- 2. ESLint: lint staged JS/TS files ---
+STAGED_JS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|mjs|cjs)$' || true)
+if [ -n "$STAGED_JS" ]; then
+  printf "  ESLint (staged files)...  "
+  # shellcheck disable=SC2086
+  if npx eslint --max-warnings 0 $STAGED_JS 2>/tmp/eslint-output; then
+    echo -e "${GREEN}PASS${NC}"
+  else
+    echo -e "${RED}FAIL${NC}"
+    cat /tmp/eslint-output
+    FAILED=1
+  fi
+else
+  echo -e "  ESLint (staged files)...  ${YELLOW}SKIP${NC} (no JS/TS files staged)"
+fi
+
+echo ""
+if [ $FAILED -ne 0 ]; then
+  echo -e "${RED}Pre-commit checks failed. Fix the issues above before committing.${NC}"
+  exit 1
+fi
+echo -e "${GREEN}All pre-commit checks passed.${NC}"

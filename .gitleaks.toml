@@ -1,0 +1,32 @@
+title = "PipelineScanner Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+description = "Generic Secret Variable Assignment"
+id = "generic-secret-var"
+regex = '''(?i)(secret|password|passwd|pwd|api_key|apikey|auth_token|access_token)\s*=\s*['"][^\s'"]{8,}['"]'''
+tags = ["secret", "generic"]
+
+[[rules]]
+description = "JWT Token"
+id = "jwt-token"
+regex = '''eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'''
+tags = ["jwt", "token"]
+
+[allowlist]
+description = "Global allowlist"
+regexes = [
+  # Ignore placeholder/example values
+  '''(?i)(secret|password|api_key)\s*=\s*['"]?(your[-_]|<|example|placeholder|changeme|xxxx|dummy)''',
+  # Ignore test fixture files
+]
+paths = [
+  '''.*test.*''',
+  '''.*spec.*''',
+  '''.*fixture.*''',
+  '''.*mock.*''',
+  '''.*\.example$''',
+  '''.*\.sample$'''
+]

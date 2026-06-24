@@ -1,0 +1,81 @@
+rules:
+  - id: no-eval
+    pattern: eval(...)
+    message: "eval() enables code injection. Refactor to avoid dynamic code execution."
+    severity: ERROR
+    languages: [javascript, typescript]
+
+  - id: no-document-write
+    pattern: document.write(...)
+    message: "document.write() can introduce XSS. Use DOM APIs (createElement, textContent) instead."
+    severity: WARNING
+    languages: [javascript, typescript]
+
+  - id: insecure-random
+    pattern: Math.random()
+    message: "Math.random() is not cryptographically secure. Use crypto.getRandomValues() or crypto.randomUUID() instead."
+    severity: WARNING
+    languages: [javascript, typescript]
+
+  - id: sql-injection-concat
+    patterns:
+      - pattern-either:
+          - pattern: $DB.query($A + $B, ...)
+          - pattern: $DB.execute($A + $B, ...)
+          - pattern: $DB.query(`...${...}...`, ...)
+          - pattern: $DB.execute(`...${...}...`, ...)
+    message: "Possible SQL injection via string concatenation or template literal. Use parameterized queries."
+    severity: ERROR
+    languages: [javascript, typescript]
+
+  - id: hardcoded-secret
+    patterns:
+      - pattern: $KEY = "$VALUE"
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i)(secret|password|passwd|api_key|apikey|token|auth|credential)
+      - metavariable-regex:
+          metavariable: $VALUE
+          regex: .{8,}
+    message: "Potential hardcoded secret in variable $KEY. Use environment variables instead."
+    severity: ERROR
+    languages: [javascript, typescript]
+
+  - id: prototype-pollution
+    patterns:
+      - pattern-either:
+          - pattern: $OBJ["__proto__"] = ...
+          - pattern: $OBJ[constructor][prototype] = ...
+          - pattern: Object.assign($OBJ["__proto__"], ...)
+    message: "Potential prototype pollution vulnerability."
+    severity: ERROR
+    languages: [javascript, typescript]
+
+  - id: document-cookie-write
+    pattern: document.cookie = ...
+    message: "Direct document.cookie write. Use a cookie library with httpOnly and Secure flags instead."
+    severity: WARNING
+    languages: [javascript, typescript]
+
+  - id: express-cookie-no-httponly
+    patterns:
+      - pattern: res.cookie($NAME, $VAL, $OPTS)
+      - pattern-not: "res.cookie($NAME, $VAL, {httpOnly: true, ...})"
+    message: "Express cookie set without httpOnly: true. Add httpOnly and secure options to prevent JS access."
+    severity: WARNING
+    languages: [javascript, typescript]
+
+  - id: path-traversal
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $PATH = $REQ.params.$X
+              ...
+              fs.$FUNC($PATH, ...)
+          - pattern: |
+              $PATH = $REQ.query.$X
+              ...
+              fs.$FUNC($PATH, ...)
+    message: "Possible path traversal: file path derived from user input. Validate and sanitize before use."
+    severity: ERROR
+    languages: [javascript, typescript]
