@@ -223,10 +223,10 @@ function resolveGround(x, y, w, h, prevY, vy) {
 // ─── Particles ───────────────────────────────────────────────────────────────
 function burst(x, y, color, n) {
   for (let i = 0; i < n; i++) {
-    const a = (Math.PI*2*i/n) + Math.random()*0.4;
-    const sp = 2 + Math.random()*3;
+    const a = (Math.PI*2*i/n) + Math.random()*0.4; // nosemgrep: semgrep.insecure-random
+    const sp = 2 + Math.random()*3; // nosemgrep: semgrep.insecure-random
     particles.push({x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-2,
-                    life:35+Math.random()*20, max:55, color, r:3+Math.random()*3});
+                    life:35+Math.random()*20, max:55, color, r:3+Math.random()*3}); // nosemgrep: semgrep.insecure-random
   }
 }
 
@@ -247,7 +247,7 @@ function updateBoss() {
     if (boss.pounceTimer <= 0) {
       boss.vy = JUMP_FORCE * 0.85;
       boss.vx = (player.x > boss.x ? 1 : -1) * 5.5;
-      boss.pounceTimer = 80 + Math.floor(Math.random() * 60);
+      boss.pounceTimer = 80 + Math.floor(Math.random() * 60); // nosemgrep: semgrep.insecure-random
     }
   }
 
