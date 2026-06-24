@@ -737,7 +737,7 @@ function drawHeart(x, y, size, filled) {
 function drawHUD() {
   for (let i = 0; i < player.maxHealth; i++) drawHeart(10+i*28, 10, 24, i < player.health);
   ctx.fillStyle = '#ffcc00'; ctx.font = 'bold 12px monospace';
-  ctx.textAlign = 'left'; ctx.fillText(playerName, 12, 46);
+  ctx.textAlign = 'left'; ctx.fillText(playerName, 12, 55);
   ctx.fillStyle = '#fff8e7'; ctx.font = 'bold 15px monospace';
   ctx.textAlign = 'center'; ctx.fillText('LVL ' + currentLevel, W/2, 26);
   ctx.textAlign = 'right';  ctx.fillText('Score: ' + score, W-10, 26);
