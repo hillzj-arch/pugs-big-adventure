@@ -589,6 +589,26 @@ function drawPug() {
   ctx.fillStyle = '#e0c090'; ctx.beginPath(); ctx.roundRect(-9,-36,18,9,4); ctx.fill();
   ctx.fillStyle = '#281808'; ctx.beginPath(); ctx.roundRect(-6,-36,12,6,2); ctx.fill();
   ctx.fillStyle = '#382818'; ctx.fillRect(-5,-35,3,2); ctx.fillRect(2,-35,3,2);
+  // Collar band
+  ctx.fillStyle = '#dd1144';
+  ctx.beginPath(); ctx.roundRect(-13,-32,26,5,2); ctx.fill();
+  // Buckle
+  ctx.fillStyle = '#ffcc00'; ctx.fillRect(-2,-34,4,9);
+  ctx.strokeStyle = '#aa7700'; ctx.lineWidth = 0.8; ctx.strokeRect(-2,-34,4,9);
+  // Chain to tag
+  ctx.strokeStyle = '#ffcc00'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,-27); ctx.lineTo(0,-23); ctx.stroke();
+  // Tag
+  const tagText = playerName.length > 8 ? playerName.slice(0,7) + '.' : playerName;
+  const tagW = Math.max(20, tagText.length * 5 + 8);
+  ctx.fillStyle = '#ffee88';
+  ctx.beginPath(); ctx.roundRect(-tagW/2,-23,tagW,10,3); ctx.fill();
+  ctx.strokeStyle = '#cc9900'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.save();
+  if (p.facing === -1) ctx.scale(-1,1);
+  ctx.fillStyle = '#664400'; ctx.font = 'bold 6px monospace';
+  ctx.textAlign = 'center'; ctx.fillText(tagText, 0,-16); ctx.textAlign = 'left';
+  ctx.restore();
   if (p.atkTimer > 5) {
     ctx.strokeStyle = 'rgba(255,255,160,0.92)'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
     for (let i = 0; i < 3; i++) {
