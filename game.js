@@ -582,13 +582,16 @@ function drawBG() {
     const sx = pic.x - cameraX;
     if (sx < -80 || sx > W+80) continue;
     if (lv3) {
-      // Background trees
+      // Background trees — trunk anchored to ground
+      const tx = sx + pic.w / 2;
+      const trunkH = 60 + (pic.x % 28);
+      const r1 = 24 + (pic.x % 10);
       ctx.fillStyle = '#5c3a10';
-      ctx.fillRect(sx + pic.w/2 - 5, pic.y + pic.h*0.45, 10, pic.h*0.55);
+      ctx.fillRect(tx - 5, GROUND_Y - trunkH, 10, trunkH);
       ctx.fillStyle = '#227730';
-      ctx.beginPath(); ctx.arc(sx + pic.w/2, pic.y + pic.h*0.32, pic.h*0.42, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(tx, GROUND_Y - trunkH - r1 * 0.55, r1, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = '#33aa44';
-      ctx.beginPath(); ctx.arc(sx + pic.w/2 - 6, pic.y + pic.h*0.18, pic.h*0.28, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(tx - 7, GROUND_Y - trunkH - r1 * 1.05, r1 * 0.62, 0, Math.PI*2); ctx.fill();
     } else {
       ctx.fillStyle = lv2 ? '#3a5070' : '#7a5c28'; ctx.fillRect(sx-4, pic.y-4, pic.w+8, pic.h+8);
       ctx.fillStyle = lv2 ? '#dce8f8' : '#e8d4a0'; ctx.fillRect(sx, pic.y, pic.w, pic.h);
