@@ -827,7 +827,7 @@ function drawAnt(ant) {
   if (sx < -40 || sx > W+40) return;
   const {w, h} = ant;
   ctx.save(); ctx.translate(sx + w/2, ant.y);
-  if (ant.facing === -1) ctx.scale(-1,1);
+  if (ant.facing === 1) ctx.scale(-1,1);
   if (ant.hitTimer > 0 && Math.floor(ant.hitTimer/3)%2===1) {
     ctx.fillStyle = 'rgba(255,80,40,0.85)'; ctx.fillRect(-w/2,0,w,h);
     ctx.restore(); return;
