@@ -22,13 +22,19 @@ window.addEventListener('keydown', e => {
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 
 let grounds, platforms, furniture, pictures;
-let cats, sausage, boss, tokens, player, cameraX, gameState, score, particles;
+let cats, ants, sausage, boss, tokens, player, cameraX, gameState, score, particles;
 let nameEntered = false, deathFormShown = false, enteredName = '', newScoreRank = -1;
 let playerName = '';
 
 function makeCat(x, pl, pr, hp, spd, startY) {
   return {x, y: startY !== undefined ? startY : GROUND_Y - 40, w: 36, h: 40, vx: spd, vy: 0,
           patrol:{l:pl, r:pr}, health:hp, maxHealth:hp,
+          hitTimer:0, dead:false, facing:1};
+}
+
+function makeAnt(x, pl, pr, spd, startY) {
+  return {x, y: startY !== undefined ? startY : GROUND_Y - 16, w: 24, h: 16, vx: spd, vy: 0,
+          patrol:{l:pl, r:pr}, health:1, maxHealth:1,
           hitTimer:0, dead:false, facing:1};
 }
 
@@ -109,7 +115,7 @@ function loadLevel(n) {
       makeCat(1210,1202,1312,1,1.3,220),
       makeCat(2010,2002,2102,2,1.7,225),
     ];
-    boss = null;
+    boss = null; ants = [];
     sausage = {x:3080, y:GROUND_Y-28, w:56, h:24, collected:false};
     tokens = [
       [120,368],[240,368],[380,368],
@@ -124,7 +130,7 @@ function loadLevel(n) {
       [2722,248],[2762,248],
       [2870,368],[3025,368],
     ].map(([x,y]) => ({x, y, collected:false}));
-  } else {
+  } else if (n === 2) {
     LEVEL_W = 3600;
     grounds = [
       {x:0,    w:380}, {x:500,  w:320}, {x:960,  w:280},
@@ -155,7 +161,7 @@ function loadLevel(n) {
       makeCat(1660,1642,1742,2,1.9,240),
       makeCat(2540,2522,2622,2,2.0,245),
     ];
-    boss = makeBoss(3430);
+    boss = makeBoss(3430); ants = [];
     sausage = {x:3440, y:GROUND_Y-28, w:56, h:24, collected:true};
     tokens = [
       [100,368],[220,368],[320,368],
@@ -173,6 +179,68 @@ function loadLevel(n) {
       [2760,368],[2910,368],
       [3110,368],[3260,368],
     ].map(([x,y]) => ({x, y, collected:false}));
+  } else {
+    // Level 3 — Backyard
+    LEVEL_W = 4000;
+    grounds = [
+      {x:0,    w:460}, {x:560,  w:320}, {x:980,  w:300},
+      {x:1390, w:280}, {x:1800, w:340}, {x:2270, w:300},
+      {x:2700, w:280}, {x:3120, w:880},
+    ];
+    platforms = [
+      {x:482,  y:310, w:100}, {x:902,  y:296, w:120}, {x:1312, y:288, w:110},
+      {x:1722, y:300, w:110}, {x:2192, y:290, w:110}, {x:2622, y:298, w:100},
+      {x:3044, y:288, w:120}, {x:3220, y:272, w:100}, {x:3420, y:282, w:110},
+    ];
+    furniture = [
+      {x:80,   y:330, w:160, h:60,  type:'bush'},
+      {x:620,  y:342, w:120, h:46,  type:'log'},
+      {x:1060, y:325, w:80,  h:65,  type:'rock'},
+      {x:1460, y:330, w:180, h:60,  type:'bush'},
+      {x:1900, y:338, w:120, h:50,  type:'log'},
+      {x:2360, y:325, w:80,  h:65,  type:'rock'},
+      {x:2760, y:330, w:160, h:60,  type:'bush'},
+      {x:3200, y:325, w:80,  h:65,  type:'rock'},
+    ];
+    boss = null;
+    sausage = {x:3870, y:GROUND_Y-28, w:56, h:24, collected:false};
+    cats = [];
+    ants = [
+      makeAnt( 220,  50, 440, 2.2),
+      makeAnt( 340,  50, 440, 2.5),
+      makeAnt( 660, 560, 860, 2.6),
+      makeAnt( 770, 560, 860, 2.8),
+      makeAnt(1060, 980,1270, 2.7),
+      makeAnt(1160, 980,1270, 2.5),
+      makeAnt(1480,1390,1660, 3.0),
+      makeAnt(1570,1390,1660, 2.8),
+      makeAnt(1960,1800,2160, 2.9),
+      makeAnt(2060,1800,2160, 3.1),
+      makeAnt(2400,2270,2570, 3.2),
+      makeAnt(2470,2270,2570, 3.0),
+      makeAnt(2820,2700,2980, 3.3),
+      makeAnt(2900,2700,2980, 3.1),
+      makeAnt(3250,3120,3600, 3.4),
+      makeAnt(3380,3120,3600, 3.2),
+      makeAnt(3520,3120,3600, 3.0),
+      makeAnt( 494, 482, 574, 2.0, 294),
+      makeAnt( 914, 902,1014, 2.2, 280),
+      makeAnt(3232,3220,3312, 2.6, 256),
+    ];
+    tokens = [
+      [150,368],[290,368],[410,368],
+      [504,292],[542,292],
+      [700,368],[840,368],
+      [924,278],[962,278],
+      [1120,368],[1270,368],
+      [1734,282],[1774,282],
+      [1920,368],[2070,368],
+      [2204,272],[2244,272],
+      [2520,368],[2660,368],
+      [3056,270],[3096,270],
+      [3232,254],[3272,254],
+      [3620,368],[3760,368],
+    ].map(([x,y]) => ({x, y, collected:false}));
   }
   buildPictures();
 }
@@ -188,6 +256,17 @@ function resetGame() {
 
 function startLevel2() {
   loadLevel(2);
+  player.x = 80; player.y = GROUND_Y - PH;
+  player.vx = 0; player.vy = 0; player.onGround = false; player.facing = 1;
+  player.health = player.maxHealth;
+  player.atkTimer = 0; player.atkCool = 0; player.iFrames = 0;
+  player.walkFrame = 0; player.walkT = 0; player.lastSafeX = 80;
+  particles = []; cameraX = 0; gameState = 'playing';
+  nameEntered = false; deathFormShown = false;
+}
+
+function startLevel3() {
+  loadLevel(3);
   player.x = 80; player.y = GROUND_Y - PH;
   player.vx = 0; player.vy = 0; player.onGround = false; player.facing = 1;
   player.health = player.maxHealth;
@@ -307,9 +386,12 @@ function update() {
       nameEntered = true;
     }
     if (pressed['Space'] || pressed['Enter']) {
-      if (gameState === 'levelComplete') startLevel2();
-      else if (gameState === 'dead' && nameEntered) {
-        if (currentLevel === 2) startLevel2(); else resetGame();
+      if (gameState === 'levelComplete') {
+        if (currentLevel === 1) startLevel2(); else startLevel3();
+      } else if (gameState === 'dead' && nameEntered) {
+        if (currentLevel === 3) startLevel3();
+        else if (currentLevel === 2) startLevel2();
+        else resetGame();
       } else if (gameState === 'win' && nameEntered) resetGame();
     }
     for (const k in pressed) delete pressed[k];
@@ -396,6 +478,38 @@ function update() {
 
   updateBoss();
 
+  for (const ant of ants) {
+    if (ant.dead) continue;
+    ant.x += ant.vx;
+    ant.facing = ant.vx > 0 ? 1 : -1;
+    if (ant.x <= ant.patrol.l) { ant.x = ant.patrol.l; ant.vx =  Math.abs(ant.vx); }
+    if (ant.x >= ant.patrol.r) { ant.x = ant.patrol.r; ant.vx = -Math.abs(ant.vx); }
+    ant.vy += GRAVITY;
+    if (ant.vy > 16) ant.vy = 16;
+    const prevAY = ant.y;
+    ant.y += ant.vy;
+    const ar = resolveGround(ant.x, ant.y, ant.w, ant.h, prevAY, ant.vy);
+    if (ar.grounded) { ant.y = ar.snapY; ant.vy = 0; }
+    if (ant.hitTimer > 0) ant.hitTimer--;
+    if (player.atkTimer > 5) {
+      const ax = player.facing === 1 ? player.x + PW - 4 : player.x - 54;
+      if (rectsOverlap(ax, player.y+4, 54, PH-8, ant.x, ant.y, ant.w, ant.h) && ant.hitTimer === 0) {
+        ant.health--; ant.hitTimer = 22; score += 5;
+        burst(ant.x + ant.w/2, ant.y + ant.h/2, '#663300', 4);
+        if (ant.health <= 0) {
+          ant.dead = true;
+          burst(ant.x + ant.w/2, ant.y + ant.h/2, '#996622', 8);
+          score += 10;
+        }
+      }
+    }
+    if (player.iFrames <= 0 && rectsOverlap(player.x, player.y, PW, PH, ant.x, ant.y, ant.w, ant.h)) {
+      player.health--; player.iFrames = 80;
+      burst(player.x + PW/2, player.y + PH/2, '#ff6666', 8);
+      if (player.health <= 0) { player.health = 0; gameState = 'dead'; }
+    }
+  }
+
   for (const tok of tokens) {
     if (!tok.collected && rectsOverlap(player.x, player.y, PW, PH, tok.x-9, tok.y-9, 18, 18)) {
       tok.collected = true;
@@ -408,7 +522,7 @@ function update() {
     sausage.collected = true;
     burst(sausage.x + sausage.w/2, sausage.y + sausage.h/2, '#ffdd00', 22);
     score += 100;
-    gameState = currentLevel === 1 ? 'levelComplete' : 'win';
+    gameState = currentLevel < 3 ? 'levelComplete' : 'win';
   }
 
   for (const p of particles) { p.x += p.vx; p.y += p.vy; p.vy += 0.18; p.vx *= 0.94; p.life--; }
@@ -419,36 +533,69 @@ function update() {
 // ─── Drawing ─────────────────────────────────────────────────────────────────
 function drawBG() {
   const lv2 = currentLevel === 2;
+  const lv3 = currentLevel === 3;
   const g = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
-  g.addColorStop(0, lv2 ? '#dce8f5' : '#f0e8d5');
-  g.addColorStop(1, lv2 ? '#c8d8ea' : '#e0d0b5');
+  if (lv3) {
+    g.addColorStop(0, '#4488dd'); g.addColorStop(0.7, '#88ccff'); g.addColorStop(1, '#aaddcc');
+  } else {
+    g.addColorStop(0, lv2 ? '#dce8f5' : '#f0e8d5');
+    g.addColorStop(1, lv2 ? '#c8d8ea' : '#e0d0b5');
+  }
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
 
-  const sw = 44, off = -(cameraX % (sw*2));
-  for (let x = off; x < W; x += sw*2) {
-    ctx.fillStyle = lv2 ? 'rgba(80,110,160,0.10)' : 'rgba(160,120,70,0.10)';
-    ctx.fillRect(x, 0, sw, GROUND_Y);
-  }
-  ctx.fillStyle = lv2 ? 'rgba(70,100,180,0.18)' : 'rgba(160,110,60,0.18)';
-  for (let wx = -(cameraX % 88); wx < W+88; wx += 88)
-    for (let wy = 50; wy < GROUND_Y - 60; wy += 88) {
-      ctx.beginPath();
-      ctx.moveTo(wx+44,wy); ctx.lineTo(wx+54,wy+10);
-      ctx.lineTo(wx+44,wy+20); ctx.lineTo(wx+34,wy+10);
-      ctx.closePath(); ctx.fill();
+  if (lv3) {
+    // Clouds (parallax at 0.3x)
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    const co = -(cameraX * 0.3) % 260;
+    for (let cx = co - 260; cx < W + 260; cx += 260) {
+      const cy = 55 + (Math.abs(cx * 0.007) % 40);
+      ctx.beginPath(); ctx.ellipse(cx,     cy,    44, 20, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx+34,  cy-10, 32, 15, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(cx-28,  cy-5,  28, 13, 0, 0, Math.PI*2); ctx.fill();
     }
-
-  ctx.fillStyle = lv2 ? '#8898c8' : '#c8a878'; ctx.fillRect(0,0,W,10);
-  ctx.fillStyle = lv2 ? '#9aaad8' : '#d4b888'; ctx.fillRect(0,10,W,5);
+    // Distant fence (parallax 0.5x)
+    const fo = -(cameraX * 0.5) % 56;
+    ctx.fillStyle = '#c89050';
+    for (let fx = fo - 56; fx < W + 56; fx += 56)
+      ctx.fillRect(fx, 290, 7, 70);
+    ctx.fillStyle = '#d4a060';
+    ctx.fillRect(0, 294, W, 7); ctx.fillRect(0, 330, W, 7);
+  } else {
+    const sw = 44, off = -(cameraX % (sw*2));
+    for (let x = off; x < W; x += sw*2) {
+      ctx.fillStyle = lv2 ? 'rgba(80,110,160,0.10)' : 'rgba(160,120,70,0.10)';
+      ctx.fillRect(x, 0, sw, GROUND_Y);
+    }
+    ctx.fillStyle = lv2 ? 'rgba(70,100,180,0.18)' : 'rgba(160,110,60,0.18)';
+    for (let wx = -(cameraX % 88); wx < W+88; wx += 88)
+      for (let wy = 50; wy < GROUND_Y - 60; wy += 88) {
+        ctx.beginPath();
+        ctx.moveTo(wx+44,wy); ctx.lineTo(wx+54,wy+10);
+        ctx.lineTo(wx+44,wy+20); ctx.lineTo(wx+34,wy+10);
+        ctx.closePath(); ctx.fill();
+      }
+    ctx.fillStyle = lv2 ? '#8898c8' : '#c8a878'; ctx.fillRect(0,0,W,10);
+    ctx.fillStyle = lv2 ? '#9aaad8' : '#d4b888'; ctx.fillRect(0,10,W,5);
+  }
 
   for (const pic of pictures) {
     const sx = pic.x - cameraX;
     if (sx < -80 || sx > W+80) continue;
-    ctx.fillStyle = lv2 ? '#3a5070' : '#7a5c28'; ctx.fillRect(sx-4, pic.y-4, pic.w+8, pic.h+8);
-    ctx.fillStyle = lv2 ? '#dce8f8' : '#e8d4a0'; ctx.fillRect(sx, pic.y, pic.w, pic.h);
-    ctx.fillStyle = lv2 ? '#4060a0' : '#70a050'; ctx.fillRect(sx+4, pic.y+4, pic.w-8, pic.h-8);
-    ctx.fillStyle = lv2 ? '#2040a8' : '#408028';
-    ctx.beginPath(); ctx.arc(sx+pic.w/2, pic.y+pic.h/2, pic.h/3, 0, Math.PI*2); ctx.fill();
+    if (lv3) {
+      // Background trees
+      ctx.fillStyle = '#5c3a10';
+      ctx.fillRect(sx + pic.w/2 - 5, pic.y + pic.h*0.45, 10, pic.h*0.55);
+      ctx.fillStyle = '#227730';
+      ctx.beginPath(); ctx.arc(sx + pic.w/2, pic.y + pic.h*0.32, pic.h*0.42, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#33aa44';
+      ctx.beginPath(); ctx.arc(sx + pic.w/2 - 6, pic.y + pic.h*0.18, pic.h*0.28, 0, Math.PI*2); ctx.fill();
+    } else {
+      ctx.fillStyle = lv2 ? '#3a5070' : '#7a5c28'; ctx.fillRect(sx-4, pic.y-4, pic.w+8, pic.h+8);
+      ctx.fillStyle = lv2 ? '#dce8f8' : '#e8d4a0'; ctx.fillRect(sx, pic.y, pic.w, pic.h);
+      ctx.fillStyle = lv2 ? '#4060a0' : '#70a050'; ctx.fillRect(sx+4, pic.y+4, pic.w-8, pic.h-8);
+      ctx.fillStyle = lv2 ? '#2040a8' : '#408028';
+      ctx.beginPath(); ctx.arc(sx+pic.w/2, pic.y+pic.h/2, pic.h/3, 0, Math.PI*2); ctx.fill();
+    }
   }
   for (const f of furniture) {
     const sx = f.x - cameraX;
@@ -472,6 +619,35 @@ function drawFurniture(x, y, w, h, type) {
     ctx.fillStyle = lv2 ? '#224460' : '#6a4c18';
     ctx.fillRect(x+w*0.08, y+h*0.14, w*0.12, h*0.86);
     ctx.fillRect(x+w*0.80, y+h*0.14, w*0.12, h*0.86);
+  } else if (type === 'bush') {
+    ctx.fillStyle = '#1e6614';
+    ctx.beginPath(); ctx.ellipse(x+w*0.28, y+h*0.6,  w*0.30, h*0.50, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x+w*0.68, y+h*0.65, w*0.28, h*0.46, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#2e8820';
+    ctx.beginPath(); ctx.ellipse(x+w*0.50, y+h*0.42, w*0.34, h*0.44, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#3eaa2c';
+    ctx.beginPath(); ctx.ellipse(x+w*0.46, y+h*0.26, w*0.22, h*0.28, 0, 0, Math.PI*2); ctx.fill();
+  } else if (type === 'log') {
+    ctx.fillStyle = '#6a3c10';
+    ctx.beginPath(); ctx.roundRect(x, y+h*0.22, w, h*0.52, 5); ctx.fill();
+    ctx.fillStyle = '#8a5828';
+    ctx.beginPath(); ctx.ellipse(x+9,   y+h*0.48, 9,   h*0.27, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(x+w-9, y+h*0.48, 9,   h*0.27, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#4a2808'; ctx.lineWidth = 1.5;
+    for (let ly = y+h*0.28; ly < y+h*0.68; ly += 8) {
+      ctx.beginPath(); ctx.moveTo(x+18, ly); ctx.lineTo(x+w-18, ly); ctx.stroke();
+    }
+    ctx.fillStyle = '#3a8018';
+    ctx.beginPath(); ctx.ellipse(x+w*0.5, y+h*0.22, w*0.38, 7, 0, 0, Math.PI*2); ctx.fill();
+  } else if (type === 'rock') {
+    ctx.fillStyle = '#7a7a72';
+    ctx.beginPath(); ctx.ellipse(x+w*0.5, y+h*0.62, w*0.44, h*0.44, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#a0a098';
+    ctx.beginPath(); ctx.ellipse(x+w*0.38, y+h*0.45, w*0.28, h*0.28, -0.3, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#909088';
+    ctx.beginPath(); ctx.ellipse(x+w*0.66, y+h*0.52, w*0.18, h*0.20, 0.2, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#606058'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x+w*0.44, y+h*0.38); ctx.lineTo(x+w*0.54, y+h*0.66); ctx.stroke();
   } else {
     ctx.fillStyle = lv2 ? '#335578' : '#6a4c18'; ctx.fillRect(x, y, w, h);
     const colors = ['#e44','#e84','#4a8','#48e','#a4e','#ea4','#e48'];
@@ -490,36 +666,59 @@ function drawFurniture(x, y, w, h, type) {
 
 function drawGround() {
   const lv2 = currentLevel === 2;
+  const lv3 = currentLevel === 3;
   const fg = ctx.createLinearGradient(0, GROUND_Y, 0, H);
-  fg.addColorStop(0,   lv2 ? '#607080' : '#9a7420');
-  fg.addColorStop(0.3, lv2 ? '#485868' : '#7a5810');
-  fg.addColorStop(1,   lv2 ? '#283848' : '#4a3408');
+  if (lv3) {
+    fg.addColorStop(0, '#5a9e28'); fg.addColorStop(0.18, '#3a7010'); fg.addColorStop(1, '#1a3a08');
+  } else {
+    fg.addColorStop(0,   lv2 ? '#607080' : '#9a7420');
+    fg.addColorStop(0.3, lv2 ? '#485868' : '#7a5810');
+    fg.addColorStop(1,   lv2 ? '#283848' : '#4a3408');
+  }
   for (const g of grounds) {
     const sx = g.x - cameraX;
     if (sx + g.w < 0 || sx > W) continue;
     ctx.fillStyle = fg; ctx.fillRect(sx, GROUND_Y, g.w, H - GROUND_Y);
-    ctx.strokeStyle = lv2 ? '#485868' : '#6a4c0c'; ctx.lineWidth = 1;
-    for (let px = 0; px < g.w; px += 80) {
-      const psx = g.x + px - cameraX;
-      ctx.strokeRect(psx, GROUND_Y+2,  Math.min(80,g.w-px), 18);
-      ctx.strokeRect(psx, GROUND_Y+22, Math.min(80,g.w-px), 16);
+    if (lv3) {
+      ctx.fillStyle = '#6ab830'; ctx.fillRect(sx, GROUND_Y-8, g.w, 8);
+      ctx.fillStyle = '#7acc40'; ctx.fillRect(sx, GROUND_Y-10, g.w, 2);
+      ctx.fillStyle = '#4a9018'; ctx.lineWidth = 1;
+      for (let px = 4; px < g.w; px += 10) {
+        const psx = g.x + px - cameraX;
+        ctx.fillRect(psx, GROUND_Y-14, 2, 6);
+      }
+    } else {
+      ctx.strokeStyle = lv2 ? '#485868' : '#6a4c0c'; ctx.lineWidth = 1;
+      for (let px = 0; px < g.w; px += 80) {
+        const psx = g.x + px - cameraX;
+        ctx.strokeRect(psx, GROUND_Y+2,  Math.min(80,g.w-px), 18);
+        ctx.strokeRect(psx, GROUND_Y+22, Math.min(80,g.w-px), 16);
+      }
+      ctx.fillStyle = lv2 ? '#8898b8' : '#c8a050'; ctx.fillRect(sx, GROUND_Y-7, g.w, 7);
+      ctx.fillStyle = lv2 ? '#9aaac8' : '#d8b060'; ctx.fillRect(sx, GROUND_Y-9, g.w, 2);
     }
-    ctx.fillStyle = lv2 ? '#8898b8' : '#c8a050'; ctx.fillRect(sx, GROUND_Y-7, g.w, 7);
-    ctx.fillStyle = lv2 ? '#9aaac8' : '#d8b060'; ctx.fillRect(sx, GROUND_Y-9, g.w, 2);
   }
 }
 
 function drawPlatforms() {
   const lv2 = currentLevel === 2;
+  const lv3 = currentLevel === 3;
   for (const p of platforms) {
     const sx = p.x - cameraX;
     if (sx + p.w < 0 || sx > W) continue;
-    ctx.fillStyle = lv2 ? '#4a6888' : '#8b6920'; ctx.fillRect(sx, p.y, p.w, PLAT_H);
-    ctx.fillStyle = lv2 ? '#8898c8' : '#c8a050'; ctx.fillRect(sx, p.y, p.w, 4);
-    ctx.fillStyle = lv2 ? '#223348' : '#5a3c08';
-    ctx.fillRect(sx, p.y+PLAT_H-2, p.w, 2);
-    ctx.fillRect(sx+6, p.y+PLAT_H, 5, 10);
-    ctx.fillRect(sx+p.w-11, p.y+PLAT_H, 5, 10);
+    if (lv3) {
+      ctx.fillStyle = '#7a8060'; ctx.fillRect(sx, p.y, p.w, PLAT_H);
+      ctx.fillStyle = '#5a8828'; ctx.fillRect(sx, p.y, p.w, 5);
+      ctx.fillStyle = '#626850'; ctx.fillRect(sx + p.w*0.28, p.y+5, p.w*0.44, PLAT_H-5);
+      ctx.fillStyle = '#9aaa70'; ctx.fillRect(sx, p.y, p.w, 2);
+    } else {
+      ctx.fillStyle = lv2 ? '#4a6888' : '#8b6920'; ctx.fillRect(sx, p.y, p.w, PLAT_H);
+      ctx.fillStyle = lv2 ? '#8898c8' : '#c8a050'; ctx.fillRect(sx, p.y, p.w, 4);
+      ctx.fillStyle = lv2 ? '#223348' : '#5a3c08';
+      ctx.fillRect(sx, p.y+PLAT_H-2, p.w, 2);
+      ctx.fillRect(sx+6, p.y+PLAT_H, 5, 10);
+      ctx.fillRect(sx+p.w-11, p.y+PLAT_H, 5, 10);
+    }
   }
 }
 
@@ -615,6 +814,46 @@ function drawPug() {
       ctx.beginPath(); ctx.moveTo(15,-26+i*8); ctx.lineTo(36+(i===1?5:0),-33+i*8); ctx.stroke();
     }
     ctx.fillStyle = '#c0986a'; ctx.fillRect(13,-28,10,10);
+  }
+  ctx.restore();
+}
+
+function drawAnt(ant) {
+  if (ant.dead) return;
+  const sx = ant.x - cameraX;
+  if (sx < -40 || sx > W+40) return;
+  const {w, h} = ant;
+  ctx.save(); ctx.translate(sx + w/2, ant.y);
+  if (ant.facing === -1) ctx.scale(-1,1);
+  if (ant.hitTimer > 0 && Math.floor(ant.hitTimer/3)%2===1) {
+    ctx.fillStyle = 'rgba(255,80,40,0.85)'; ctx.fillRect(-w/2,0,w,h);
+    ctx.restore(); return;
+  }
+  // Abdomen
+  ctx.fillStyle = '#1a0e00';
+  ctx.beginPath(); ctx.ellipse(w*0.22, h*0.52, 7, 5.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#2a1800';
+  ctx.beginPath(); ctx.ellipse(w*0.22, h*0.38, 5, 4, 0, 0, Math.PI*2); ctx.fill();
+  // Thorax
+  ctx.fillStyle = '#221000';
+  ctx.beginPath(); ctx.ellipse(-1, h*0.5, 3.5, 3, 0, 0, Math.PI*2); ctx.fill();
+  // Head
+  ctx.fillStyle = '#1a0a00';
+  ctx.beginPath(); ctx.ellipse(-w*0.30, h*0.44, 4.5, 3.8, 0, 0, Math.PI*2); ctx.fill();
+  // Eye
+  ctx.fillStyle = '#cc1a00';
+  ctx.beginPath(); ctx.arc(-w*0.36, h*0.3, 1.8, 0, Math.PI*2); ctx.fill();
+  // Antennae
+  ctx.strokeStyle = '#1a0a00'; ctx.lineWidth = 0.9; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-w*0.3, h*0.22);
+  ctx.quadraticCurveTo(-w*0.52, h*0.0, -w*0.58, -h*0.08); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-w*0.28, h*0.20);
+  ctx.quadraticCurveTo(-w*0.20, -h*0.08, -w*0.14, -h*0.14); ctx.stroke();
+  // Legs
+  ctx.lineWidth = 0.8;
+  for (const [lx, ly] of [[-3, h*0.44], [0, h*0.5], [4, h*0.56]]) {
+    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx - 7, h+2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lx + 7, h+2); ctx.stroke();
   }
   ctx.restore();
 }
@@ -792,10 +1031,14 @@ function draw() {
   ctx.clearRect(0,0,W,H);
   drawBG(); drawGround(); drawPlatforms(); drawTokens(); drawSausage();
   for (const cat of cats) drawCat(cat);
+  for (const ant of ants) drawAnt(ant);
   drawBoss(); drawPug(); drawParticles(); drawHUD();
   if (gameState === 'dead' && nameEntered) drawHighScores('WOOF!', '#ff4444');
   if (gameState === 'win'  && nameEntered) drawHighScores('SAUSAGE GET!', '#ffcc00');
-  if (gameState === 'levelComplete') drawOverlay('LEVEL 1 CLEAR!','Score: ' + score, 'Press SPACE for Level 2!', '#ffcc00');
+  if (gameState === 'levelComplete') {
+    const nxt = currentLevel === 1 ? 'Level 2' : 'Level 3';
+    drawOverlay(`LEVEL ${currentLevel} CLEAR!`, 'Score: ' + score, `Press SPACE for ${nxt}!`, '#ffcc00');
+  }
 }
 
 // ─── Loop ────────────────────────────────────────────────────────────────────
